@@ -108,13 +108,13 @@ input{background:#fffdf3!important;border:3px solid #a8814f!important;color:#5c4
 .spec-info{flex:1;min-width:0;font-size:12px;font-weight:700;line-height:1.4}.spec-name{font-size:17px;font-weight:900;margin-bottom:2px}
 .spec-brick{min-height:76px!important;padding:6px 2px!important}.sb-ico{font-size:28px!important}
 /* 遊戲畫面：整頁塞進視窗，不需捲動 */
-@supports (height:100dvh){html,body,#app-wrapper{height:100dvh}}
-#screen-game .portrait-frame{width:clamp(58px,9.5dvh,84px);height:clamp(70px,11.5dvh,102px)}
-#screen-game .name-sign{padding:4px 16px}#screen-game .name-sign h2{font-size:clamp(20px,3.2dvh,26px)}
+
+#screen-game .portrait-frame{width:clamp(58px,calc(9.5*var(--u)),84px);height:clamp(70px,calc(11.5*var(--u)),102px)}
+#screen-game .name-sign{padding:4px 16px}#screen-game .name-sign h2{font-size:clamp(20px,calc(3.2*var(--u)),26px)}
 #screen-game .dept-sign{padding:3px 12px}
-#screen-game .wood-card{padding:4px 8px}#screen-game .wood-card .ico{font-size:clamp(22px,3.4dvh,30px)}#screen-game .wood-card .val{font-size:clamp(15px,2.3dvh,18px)}
+#screen-game .wood-card{padding:4px 8px}#screen-game .wood-card .ico{font-size:clamp(22px,calc(3.4*var(--u)),30px)}#screen-game .wood-card .val{font-size:clamp(15px,calc(2.3*var(--u)),18px)}
 #screen-game .wood-panel{margin-top:6px;padding:6px 10px}
-#screen-game .tile{padding:4px 6px}#screen-game .tile .ico{font-size:clamp(20px,3dvh,26px)}#screen-game .tile .num{font-size:clamp(15px,2.2dvh,18px)}
+#screen-game .tile{padding:4px 6px}#screen-game .tile .ico{font-size:clamp(20px,calc(3*var(--u)),26px)}#screen-game .tile .num{font-size:clamp(15px,calc(2.2*var(--u)),18px)}
 #screen-game .parchment{margin-top:6px;padding:5px 10px}#screen-game .parchment .big{font-size:26px}
 .ev-desc{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #screen-game .datebar{margin:6px 8px;padding:3px 12px}
@@ -158,7 +158,7 @@ input{background:#fffdf3!important;border:3px solid #a8814f!important;color:#5c4
 
 /* ===== 科別圖示 / 金錢浮動提示 ===== */
 [id^="tab-"]{background:none!important;border:0!important;box-shadow:none!important;padding:2px!important;display:flex;justify-content:center;transition:transform .15s,filter .15s}
-[id^="tab-"] .dept-img{height:clamp(78px,11.5dvh,104px);width:auto;max-width:100%;object-fit:contain;display:block;pointer-events:none}
+[id^="tab-"] .dept-img{height:clamp(78px,calc(11.5*var(--u)),104px);width:auto;max-width:100%;object-fit:contain;display:block;pointer-events:none}
 [id^="tab-"].opacity-75{opacity:1!important;filter:saturate(.5) brightness(.96);transform:scale(.9)}
 [id^="tab-"]:not(.opacity-75){transform:translateY(-3px) scale(1.04);filter:drop-shadow(0 4px 0 rgba(107,68,35,.5))}
 .rpg-btn.spec-brick:has(.sb-img){background:none!important;border:0!important;box-shadow:none!important;min-height:0!important;padding:2px!important;transform:none!important}
@@ -174,7 +174,7 @@ input{background:#fffdf3!important;border:3px solid #a8814f!important;color:#5c4
 .funds-up{color:#1f8a3b}.funds-dn{color:#c0392b}
 @keyframes fundsFloat{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-18px)}}
 
-#ending-desc{max-height:56dvh;overflow-y:auto}
+#ending-desc{max-height:calc(56*var(--u));overflow-y:auto}
 .ending-recap{margin-top:12px;padding-top:8px;border-top:2px dashed rgba(255,255,255,.28);font-size:12px;line-height:1.65;color:#d6dae0}
 .ending-recap ul{list-style:none;margin:4px 0 0;padding:0}
 .ending-recap li{padding:1px 0}
@@ -185,9 +185,130 @@ input{-webkit-user-select:text;user-select:text}
 #btn-start:active{background:rgba(255,255,255,.25)}
 #btn-start:focus-visible{outline:3px solid #fff}
 #modal-retry{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(107,68,35,.85);padding:20px;max-width:460px;margin:0 auto}
+
+/* ===================================================================
+   手機一屏適配
+   --app-h：實際可視高度（由 JS 以 innerHeight 校正，不支援 dvh 的舊瀏覽器也正確）
+   --u    ：1% 的可視高度
+   =================================================================== */
+:root{--app-h:100vh;--u:calc(var(--app-h)/100)}
+@supports (height:100dvh){:root{--app-h:100dvh}}
+html{height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%;overscroll-behavior:none}
+body{position:fixed;top:0;left:0;right:0;width:100%;height:var(--app-h);overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+#app-wrapper{height:100%}
+/* 瀏海／底部手勢條安全區 */
+.view-screen{top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:0;right:0;height:auto}
+#screen-start{top:0;bottom:0}
+/* iOS：輸入框字級小於 16px 會自動放大頁面，造成畫面跑掉 */
+input{font-size:16px!important}
+/* 彈窗跟著 app 高度，不用 vh */
+#modal-shop,#modal-promotion,#modal-ceremony,#modal-retry{top:0;bottom:auto;height:var(--app-h)}
+#modal-ceremony,#modal-retry{overflow-y:auto}
+.shop-panel{height:min(calc(80*var(--u)),calc(var(--app-h) - 32px))!important}
+.modal-fit{max-height:calc(var(--app-h) - 32px);overflow-y:auto}
+#screen-ending{justify-content:safe center;overflow-y:auto}
+
+/* ---------- 遊戲主畫面：依高度連續縮放 ---------- */
+#screen-game .pt-3{padding-top:clamp(6px,calc(1.6*var(--u)),12px)}
+#screen-game .gap-2{gap:clamp(3px,calc(.9*var(--u)),8px)}
+#screen-game .grid.mt-1{margin-top:0}
+#screen-game .portrait-frame{width:clamp(44px,calc(8*var(--u)),84px);height:clamp(52px,calc(9.6*var(--u)),102px);padding:2px}
+#screen-game .name-sign{padding:clamp(1px,calc(.5*var(--u)),4px) 14px}
+#screen-game .name-sign h2{font-size:clamp(16px,calc(3.2*var(--u)),26px)}
+#screen-game .dept-sign{padding:0 12px;font-size:clamp(12px,calc(1.9*var(--u)),14px)}
+#screen-game .wood-card{padding:clamp(2px,calc(.6*var(--u)),4px) 8px}
+#screen-game .wood-card .ico{font-size:clamp(20px,calc(3.4*var(--u)),30px)}
+#screen-game .wood-card .lbl{font-size:clamp(10px,calc(1.6*var(--u)),12px)}
+#screen-game .wood-card .val{font-size:clamp(14px,calc(2.3*var(--u)),18px)}
+#screen-game .wood-panel{margin:clamp(4px,calc(1*var(--u)),8px) 8px 0;padding:clamp(4px,calc(1*var(--u)),8px) 10px}
+#screen-game .wood-panel .mt-2{margin-top:clamp(3px,calc(.8*var(--u)),8px)}
+#screen-game .stat-bar-bg{height:clamp(13px,calc(2.3*var(--u)),18px)!important}
+#screen-game .tile{padding:clamp(2px,calc(.6*var(--u)),4px) 6px}
+#screen-game .tile .ico{font-size:clamp(20px,calc(3*var(--u)),26px)}
+#screen-game .tile .lbl{font-size:clamp(10px,calc(1.6*var(--u)),11px)}
+#screen-game .tile .num{font-size:clamp(14px,calc(2.2*var(--u)),18px)}
+#screen-game .parchment{margin:clamp(4px,calc(.9*var(--u)),8px) 8px 0;padding:clamp(3px,calc(.7*var(--u)),6px) 10px}
+#screen-game .parchment .big{font-size:clamp(20px,calc(3.4*var(--u)),26px)}
+#screen-game .ev-title{font-size:clamp(12px,calc(1.9*var(--u)),14px)}
+#screen-game .datebar{margin:clamp(4px,calc(.9*var(--u)),6px) 8px;padding:clamp(2px,calc(.5*var(--u)),4px) 12px}
+#screen-game .datebar .d{font-size:clamp(14px,calc(2.3*var(--u)),18px)}
+#screen-game .datebar #ui-countdown-box{font-size:clamp(12px,calc(2*var(--u)),15px)!important}
+#screen-game #ui-countdown{font-size:clamp(13px,calc(2.2*var(--u)),18px)!important}
+#action-buttons-container{gap:clamp(4px,calc(.9*var(--u)),8px);padding-left:8px;padding-right:8px}
+#action-buttons-container .act-plank{padding:clamp(2px,calc(.6*var(--u)),8px) 3px}
+#action-buttons-container .act-ico{font-size:clamp(22px,calc(3.6*var(--u)),34px)}
+#action-buttons-container .act-txt b{font-size:clamp(12px,calc(1.9*var(--u)),14px)}
+#screen-game .bottom-bar{gap:8px;padding:clamp(4px,calc(.8*var(--u)),8px) 10px clamp(8px,calc(1.6*var(--u)),14px)}
+#screen-game .bottom-bar .rpg-btn{padding:clamp(4px,calc(.8*var(--u)),8px) 6px;font-size:clamp(12px,calc(2.1*var(--u)),15px)}
+#screen-game .bottom-bar .rpg-btn .text-2xl{font-size:clamp(18px,calc(3.2*var(--u)),24px)}
+@media (max-height:700px){
+  #screen-game .wood-sign,#screen-game .wood-card,#screen-game .wood-panel{border-width:3px;box-shadow:0 3px 0 #6b4423,inset 0 0 0 1px #fbeccb}
+  #screen-game .parchment,#screen-game .datebar,#screen-game .tile{border-width:2px}
+  #screen-game .parchment{box-shadow:0 2px 0 #b98f5a}
+  #screen-game .ev-desc{-webkit-line-clamp:1}
+  #action-buttons-container .act-plank{border-width:2px!important;box-shadow:0 3px 0 #6b4423!important;border-radius:11px!important}
+  #action-buttons-container .act-txt small{display:none}
+  #action-buttons-container .costline{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:9px;line-height:1.2}
+  #action-buttons-container .price-pill{font-size:11px;padding:0 6px}
+  #action-buttons-container .price-pill small{display:none}
+  #screen-game .bottom-bar .rpg-btn{border-width:3px!important;box-shadow:0 3px 0 #6b4423!important}
+}
+/* 極矮的螢幕：寧可讓主畫面可上下捲動，也不要把按鈕裁掉 */
+@media (max-height:520px){
+  #screen-game{overflow-y:auto!important}
+  #action-buttons-container{flex:none!important;height:170px}
+}
+
+/* ---------- 開局設定 ---------- */
+#screen-setup .edu-btn{min-height:clamp(54px,calc(9.5*var(--u)),80px);padding-top:4px;padding-bottom:4px}
+#screen-setup .thumb{width:clamp(40px,calc(7.8*var(--u)),62px);height:clamp(48px,calc(9*var(--u)),72px)}
+#setup-step-2 [id^="tab-"] .dept-img{height:clamp(56px,calc(10*var(--u)),104px)}
+.spec-art{width:clamp(64px,min(26vw,calc(13*var(--u))),124px)}
+#sp-detail{flex:none;max-height:calc(26*var(--u));overflow-y:auto}
+.spec-info{font-size:clamp(10.5px,calc(1.9*var(--u)),12px)}
+.spec-name{font-size:clamp(14px,calc(2.6*var(--u)),17px)}
+@media (max-height:760px){
+  #screen-setup{padding:10px 12px!important}
+  #screen-setup .header-sign{margin:6px 14px 0;padding:3px 10px 5px}
+  #screen-setup .header-sign h1{font-size:clamp(19px,calc(3.6*var(--u)),26px)}
+  #screen-setup .mt-2,#screen-setup .mt-1{margin-top:0}
+  #screen-setup .gap-2{gap:6px}
+  #screen-setup .mb-2{margin-bottom:4px}
+  #screen-setup .rpg-box{border-width:3px!important;border-radius:14px!important}
+}
+
+/* ---------- 升等考場 / 結局 ---------- */
+#exam-question-text{max-height:calc(32*var(--u));overflow-y:auto}
+@media (max-height:700px){
+  #screen-exam{padding:10px 12px!important}
+  #screen-exam>div:first-child{margin:0 0 4px!important}
+  #screen-exam .text-xl{font-size:17px}
+  #exam-timer{margin-bottom:6px}
+  #exam-question-text{padding:10px!important;margin-bottom:6px!important;font-size:12.5px!important}
+  #exam-feedback{min-height:18px;margin:-2px 0 4px}
+  #ending-desc{max-height:calc(42*var(--u))}
+  #ending-icon{font-size:40px;margin-bottom:6px}
+}
+
+/* ---------- 橫放手機：提示轉直向 ---------- */
+#rotate-hint{display:none;position:fixed;inset:0;z-index:9999;background:#d7c4a1;color:#5c4033;font-weight:900;font-size:18px;text-align:center;padding:24px;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+@media (orientation:landscape) and (max-height:500px){#rotate-hint{display:flex}}
 </style>
+<script>
+// 以實際可視高度校正版面（修正手機網址列／工具列造成的高度誤差）
+(function () {
+    var root = document.documentElement;
+    function fit() { root.style.setProperty('--app-h', window.innerHeight + 'px'); }
+    fit();
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', function () { setTimeout(fit, 250); });
+    // 輸入框失焦（鍵盤收起）後，把頁面捲回原位
+    document.addEventListener('focusout', function () { setTimeout(function () { window.scrollTo(0, 0); fit(); }, 80); });
+})();
+</script>
 </head>
 <body>
+<div id="rotate-hint"><div style="font-size:54px">📱</div><div>請將手機轉為直向遊玩</div></div>
 
 <div id="app-wrapper">
     <button id="music-toggle" type="button" onclick="toggleMusic(event)" title="背景音樂">🎵</button>
@@ -312,7 +433,7 @@ input{-webkit-user-select:text;user-select:text}
 
     <!-- ================= 4. 巨塔地下街 (商店) ================= -->
     <div id="modal-shop" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/85 backdrop-blur-sm p-4" style="max-width: 460px; margin: 0 auto;">
-        <div class="rpg-box w-full max-w-sm flex flex-col bg-[#0a1210] h-[80vh]">
+        <div class="rpg-box w-full max-w-sm flex flex-col bg-[#0a1210] shop-panel">
             <div class="bg-gradient-to-r from-emerald-900 via-emerald-800 to-emerald-900 p-2 border-b-2 border-emerald-600/50 text-center relative">
                 <h2 class="text-lg font-black text-white tracking-widest">巨塔地下街 & 黑市</h2>
                 <div class="text-[10px] text-emerald-200 mt-0.5">有錢能使鬼推磨，花錢買健康跟官位！</div>
@@ -381,7 +502,7 @@ input{-webkit-user-select:text;user-select:text}
 
     <!-- ================= 5. 雙軌升遷面試面板 ================= -->
     <div id="modal-promotion" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/85 backdrop-blur-sm p-4" style="max-width: 460px; margin: 0 auto;">
-        <div class="rpg-box w-full max-w-sm flex flex-col bg-[#0a1210]">
+        <div class="rpg-box w-full max-w-sm flex flex-col bg-[#0a1210] modal-fit">
             <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-2 border-b-2 border-yellow-600/50 text-center relative">
                 <h2 class="text-lg font-black title-gold tracking-widest">升遷評議委員會</h2>
                 <div class="text-[10px] text-gray-400 mt-0.5">Publish or Perish. 不升等，就滾蛋。</div>
