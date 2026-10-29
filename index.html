@@ -293,6 +293,39 @@ input{font-size:16px!important}
 /* ---------- 橫放手機：提示轉直向 ---------- */
 #rotate-hint{display:none;position:fixed;inset:0;z-index:9999;background:#d7c4a1;color:#5c4033;font-weight:900;font-size:18px;text-align:center;padding:24px;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 @media (orientation:landscape) and (max-height:500px){#rotate-hint{display:flex}}
+
+/* ---------- iPhone 窄螢幕與安全區修正 ---------- */
+#app-wrapper{width:100%;width:min(100%,460px);height:var(--app-h);min-height:0}
+.view-screen{box-sizing:border-box}
+#screen-game{min-height:0}
+#action-buttons-container{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#action-buttons-container>*{min-width:0;max-width:100%;box-sizing:border-box}
+#action-buttons-container .act-txt,#action-buttons-container .act-txt b,#action-buttons-container .act-txt small{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+#action-buttons-container .price-pill{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+#screen-game .bottom-bar{flex-shrink:0;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px));padding-bottom:max(8px,env(safe-area-inset-bottom,0px))}
+#screen-game .bottom-bar .rpg-btn{min-width:0;overflow-wrap:anywhere;word-break:keep-all;white-space:normal}
+#screen-game .bottom-bar .rpg-btn span{min-width:0;max-width:100%}
+#screen-game .datebar{gap:4px;min-width:0}
+#screen-game .datebar>*{min-width:0}
+#screen-game #ui-countdown-box{font-size:clamp(10px,3vw,15px)!important;text-align:right;line-height:1.2}
+#screen-game .parchment>div{min-width:0;overflow-wrap:anywhere}
+#screen-game .wood-panel,#screen-game .parchment,#screen-game .datebar{box-sizing:border-box;max-width:calc(100% - 16px)}
+#screen-setup,#screen-exam,#screen-ending{box-sizing:border-box;overflow-y:auto;overscroll-behavior:contain;padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+#screen-setup>* ,#screen-exam>*{flex-shrink:0}
+#exam-options{min-height:0;flex:1 1 auto}
+.rpg-btn.exam-opt{min-width:0;overflow-wrap:anywhere}
+.modal-fit,.shop-panel{box-sizing:border-box;width:100%;min-width:0}
+@media (max-width:380px){
+  #action-buttons-container{gap:4px!important;padding-left:5px;padding-right:5px}
+  #action-buttons-container .act-plank{padding-left:2px;padding-right:2px}
+  #action-buttons-container .act-txt b{font-size:12px}
+  #action-buttons-container .act-txt small{font-size:9px}
+  #screen-game .bottom-bar{gap:5px;padding-left:6px;padding-right:6px}
+  #screen-game .bottom-bar .rpg-btn{font-size:11px;line-height:1.15;gap:3px;padding:5px 3px}
+  #screen-game .bottom-bar .rpg-btn .text-2xl{font-size:19px}
+  #screen-game .datebar{padding-left:7px;padding-right:7px}
+  #screen-game .datebar .d{font-size:13px}
+}
 </style>
 <script>
 // 以實際可視高度校正版面（修正手機網址列／工具列造成的高度誤差）
