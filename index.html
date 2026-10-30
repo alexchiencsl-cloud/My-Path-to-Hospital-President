@@ -146,6 +146,13 @@ input{background:#fffdf3!important;border:3px solid #a8814f!important;color:#5c4
 .rpg-btn.exam-opt:disabled:not(.exam-correct):not(.exam-wrong){opacity:.55}
 @keyframes examPop{50%{transform:scale(1.04)}}
 @keyframes examShake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* ---------- 向長官求救（每題一次，每次考試最多 3 次） ---------- */
+#exam-help-bar{flex:none;margin-top:8px}
+#btn-exam-help{width:100%;padding:9px 6px;font-size:14px}
+.rpg-btn.exam-opt.exam-hint:not(.exam-correct):not(.exam-wrong){background:linear-gradient(#fff3a8,#ffd84a)!important;border-color:#d9892b!important;box-shadow:0 4px 0 #a8641a,0 0 0 3px #fff5b8!important;color:#5c3a0a!important;animation:examHint .8s infinite alternate}
+.rpg-btn.exam-opt.exam-hint::after{content:"💡";margin-left:auto;flex:none}
+@keyframes examHint{to{filter:brightness(1.15)}}
+
 #sfx-toggle,#music-toggle{position:absolute;top:5px;right:5px;z-index:90;width:28px;height:28px;border-radius:50%;border:3px solid #8b5a2b;background:#ffe483;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 0 #6b4423;opacity:.9;padding:0;cursor:pointer}
 #music-toggle{right:39px}
 /* ===== 封面 ===== */
@@ -183,7 +190,7 @@ input{-webkit-user-select:text;user-select:text}
 #btn-start{position:absolute;z-index:4;background:transparent;border:0;border-radius:22px;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent}
 #btn-start:active{background:rgba(255,255,255,.25)}
 #btn-start:focus-visible{outline:3px solid #fff}
-#modal-retry{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(107,68,35,.85);padding:20px;max-width:460px;margin:0 auto}
+#modal-retry,#modal-help{position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;background:rgba(107,68,35,.85);padding:20px;max-width:460px;margin:0 auto}
 
 /* ===================================================================
    手機一屏適配
@@ -201,8 +208,8 @@ body{position:fixed;top:0;left:0;right:0;width:100%;height:var(--app-h);overflow
 /* iOS：輸入框字級小於 16px 會自動放大頁面，造成畫面跑掉 */
 input{font-size:16px!important}
 /* 彈窗跟著 app 高度，不用 vh */
-#modal-shop,#modal-promotion,#modal-ceremony,#modal-retry{top:0;bottom:auto;height:var(--app-h)}
-#modal-ceremony,#modal-retry{overflow-y:auto}
+#modal-shop,#modal-promotion,#modal-ceremony,#modal-retry,#modal-help{top:0;bottom:auto;height:var(--app-h)}
+#modal-ceremony,#modal-retry,#modal-help{overflow-y:auto}
 .shop-panel{height:min(calc(80*var(--u)),calc(var(--app-h) - 32px))!important}
 .modal-fit{max-height:calc(var(--app-h) - 32px);overflow-y:auto}
 #screen-ending{justify-content:safe center;overflow-y:auto}
@@ -285,6 +292,8 @@ input{font-size:16px!important}
   #exam-timer{margin-bottom:6px}
   #exam-question-text{padding:10px!important;margin-bottom:6px!important;font-size:12.5px!important}
   #exam-feedback{min-height:18px;margin:-2px 0 4px}
+  #exam-help-bar{margin-top:6px}
+  #btn-exam-help{padding:7px 6px;font-size:13px}
   #ending-desc{max-height:calc(42*var(--u))}
   #ending-icon{font-size:40px;margin-bottom:6px}
 }
@@ -575,7 +584,7 @@ input{font-size:16px!important}
         </div>
         <div id="exam-feedback">&nbsp;</div>
         <div class="flex-1 flex flex-col gap-2 overflow-y-auto" id="exam-options"></div>
-        <!-- 移除求救長官按鈕，靠實力與迷因知識過關 -->
+        <div id="exam-help-bar"><button type="button" id="btn-exam-help" class="rpg-btn" onclick="openExamHelp()">🙏 向長官求救（剩 3 次）</button></div>
     </div>
 
     <!-- ================= 7. 晉升慶祝動畫 Modal (全新 UI) ================= -->
@@ -1221,7 +1230,7 @@ function openPromotionPanel() {
 
 function applyPromotion(type) {
     document.getElementById("modal-promotion").classList.add("hidden");
-    state.examType = type; state.examSciPaid = 0; state.examRetried = false;
+    state.examType = type; state.examSciPaid = 0; state.examRetried = false; state.examHelps = 0;
     
     if (type === 'academic') {
         const next = academicRanks[getRankIndex('academic') + 1];
@@ -1348,6 +1357,7 @@ function renderExamQuestion() {
         btn.onclick = () => submitExamAnswer(idx);
         optionsDiv.appendChild(btn);
     });
+    examHinted = false; updateHelpBtn();
     startExamTimer();
 }
 
@@ -1355,6 +1365,7 @@ function submitExamAnswer(choice) {   // choice = -1 代表時間到
     if (examLocked) return;
     examLocked = true;
     clearExamTimer();
+    updateHelpBtn();
     const timedOut = choice < 0;
     const correct = !timedOut && examOptions[choice].ok;
     const btns = document.querySelectorAll('#exam-options .exam-opt');
@@ -1481,11 +1492,80 @@ function requestRetryAd() {
 function startRetry() {
     if (!adOpened) return;
     clearInterval(adTimer); document.getElementById('modal-retry').style.display = 'none';
-    state.examRetried = true; state.examScore = 0; state.examIndex = 0;
+    state.examRetried = true; state.examScore = 0; state.examIndex = 0; state.examHelps = 0;
     state.examTargetQuestions = pickExamQuestions(state.examType, getRankIndex(state.examType));
     renderExamQuestion();
 }
 function declineRetry() { clearInterval(adTimer); document.getElementById('modal-retry').style.display = 'none'; failExam(); }
+
+// ---- 向長官求救：每題可看廣告換取長官暗示正確答案；每次考試最多 EXAM_HELP_MAX 次 ----
+const EXAM_HELP_MAX = 3;
+let examHinted = false, helpTimer = null, helpAdOpened = false, helpReady = false, examPausedRemain = 0;
+function examHelpsLeft() { return Math.max(0, EXAM_HELP_MAX - (state.examHelps || 0)); }
+function updateHelpBtn() {
+    const b = document.getElementById('btn-exam-help'); if (!b) return;
+    const left = examHelpsLeft();
+    b.disabled = examLocked || examHinted || left <= 0;
+    b.textContent = examHinted ? '💡 長官已暗示本題答案' : left <= 0 ? '🙅 求救次數已用完' : `🙏 向長官求救（剩 ${left} 次）`;
+}
+function pauseExamTimer() {   // 看廣告期間暫停本題計時
+    if (!examTimer) return;
+    examPausedRemain = Math.max(0, examDeadline - Date.now());
+    clearInterval(examTimer); examTimer = null;
+}
+function resumeExamTimer() {
+    if (examTimer || examLocked) return;
+    examDeadline = Date.now() + Math.max(examPausedRemain, 5000);   // 求救後至少保留 5 秒作答
+    examLastTickSec = -1; updateExamTimerUI();
+    examTimer = setInterval(updateExamTimerUI, 100);
+}
+function ensureHelpModal() {
+    if (document.getElementById('modal-help')) return;
+    const d = document.createElement('div'); d.id = 'modal-help';
+    d.innerHTML = '<div class="rpg-box" style="padding:18px;max-width:340px;width:100%;text-align:center"><div style="font-size:42px">📞</div><div style="font-size:19px;font-weight:900;margin:4px 0">向長官求救</div><div id="help-left" style="font-size:14px;font-weight:800;line-height:1.6"></div><div style="font-size:13px;font-weight:700;margin-top:8px;line-height:1.6">長官人面廣，打通電話就能偷偷告訴你這題的答案。（考試計時已暫停）</div><button type="button" id="btn-help-ad" class="rpg-btn" style="width:100%;margin-top:12px;padding:10px;font-size:16px" onclick="requestHelpAd()">🙏 請長官指點（觀看廣告）</button><button type="button" id="btn-help-go" class="rpg-btn" style="display:none;width:100%;margin-top:12px;padding:10px;font-size:16px" onclick="applyHelp()">💡 聽長官的指示</button><button type="button" id="btn-help-cancel" class="rpg-btn" style="width:100%;margin-top:8px;padding:8px;font-size:13px" onclick="closeExamHelp()">算了，我自己來</button></div>';
+    document.getElementById('app-wrapper').appendChild(d);
+}
+function openExamHelp() {
+    if (examLocked || examHinted || examHelpsLeft() <= 0) return;
+    ensureHelpModal(); pauseExamTimer();
+    helpAdOpened = false; helpReady = false; clearInterval(helpTimer);
+    document.getElementById('help-left').textContent = `本次考試還剩 ${examHelpsLeft()} 次求救機會`;
+    const a = document.getElementById('btn-help-ad'); a.disabled = false; a.style.display = ''; a.textContent = '🙏 請長官指點（觀看廣告）';
+    document.getElementById('btn-help-go').style.display = 'none';
+    document.getElementById('btn-help-cancel').style.display = '';
+    document.getElementById('modal-help').style.display = 'flex';
+}
+function requestHelpAd() {
+    const a = document.getElementById('btn-help-ad'); if (a.disabled) return;
+    window.open(AD_URL, '_blank', 'noopener');
+    helpAdOpened = true; a.disabled = true; let left = AD_WAIT;
+    a.textContent = `⏳ 長官正在翻資料…（${left}）`;
+    clearInterval(helpTimer);
+    helpTimer = setInterval(() => {   // 分頁在背景（正在看廣告）時暫停倒數，回到遊戲才繼續
+        if (document.hidden) return;
+        left--; a.textContent = `⏳ 長官正在翻資料…（${Math.max(left, 0)}）`;
+        if (left <= 0) {
+            clearInterval(helpTimer); helpReady = true; a.style.display = 'none';
+            document.getElementById('btn-help-cancel').style.display = 'none';
+            document.getElementById('btn-help-go').style.display = ''; SFX.pass();
+        }
+    }, 1000);
+}
+function closeExamHelp() {
+    clearInterval(helpTimer);
+    document.getElementById('modal-help').style.display = 'none';
+    resumeExamTimer();
+}
+function applyHelp() {
+    if (!helpAdOpened || !helpReady) return;
+    clearInterval(helpTimer); helpAdOpened = false; helpReady = false;
+    document.getElementById('modal-help').style.display = 'none';
+    state.examHelps = (state.examHelps || 0) + 1; examHinted = true;
+    const btns = document.querySelectorAll('#exam-options .exam-opt');
+    examOptions.forEach((o, i) => { if (o.ok && btns[i]) btns[i].classList.add('exam-hint'); });
+    document.getElementById('exam-feedback').innerHTML = '<span style="color:#b7791f">💡 長官小聲說：「選閃閃發亮的那個。」</span>';
+    updateHelpBtn(); resumeExamTimer();
+}
 
 // ==================== 8.5 新增：遊戲內對話框 / 隨機事件 / 效果預覽 / 結局收集 ====================
 let pendingFatal = null;
