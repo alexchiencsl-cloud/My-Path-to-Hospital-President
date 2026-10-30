@@ -1,0 +1,13 @@
+{
+  "name": "tower-survival-game",
+  "version": "1.0.0",
+  "private": true,
+  "description": "我的院長之路 - 白色巨塔生存模擬器",
+  "scripts": {
+    "build": "tailwindcss -c tailwind.config.js -i ./src/input.css -o ./tailwind.css --minify",
+    "watch": "tailwindcss -c tailwind.config.js -i ./src/input.css -o ./tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

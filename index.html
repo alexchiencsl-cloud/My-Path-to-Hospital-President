@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>我的院長之路 - 白色巨塔生存模擬器</title>
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
 html,body{margin:0;padding:0;width:100%;height:100%;background:#d7c4a1;font-family:'M PLUS Rounded 1c',sans-serif;overflow:hidden;touch-action:manipulation;user-select:none;color:#5c4033}
@@ -309,6 +308,18 @@ input{font-size:16px!important}
 #action-buttons-container .price-pill{line-height:1.1;margin-top:1px}
 #screen-game .bottom-bar .rpg-btn{white-space:nowrap;font-size:clamp(11.5px,calc(1.9*var(--u)),14px)}
 #screen-game .bottom-bar .rpg-btn .text-2xl{font-size:clamp(16px,calc(2.8*var(--u)),22px);line-height:1}
+
+/* ===== 第三輪：訊息欄完整顯示、移除按鈕效果數字、數值欄去圖示 ===== */
+/* 行動按鈕：隱藏效果數字（體力/壓力/Exp/SCI），只留名稱與價格 */
+#action-buttons-container .costline{display:none!important}
+/* 事件訊息欄：不再截成一行，完整顯示（超長才在欄內捲動） */
+#screen-game .parchment .ev-desc{display:block;-webkit-line-clamp:unset;max-height:calc(13*var(--u));overflow-y:auto;-webkit-overflow-scrolling:touch}
+#screen-game .parchment>div{min-width:0}
+/* 臨床 Exp / SCI 積分 / 資金：拿掉小圖示，文字置中 */
+#screen-game .tile .ico{display:none}
+#screen-game .tile{justify-content:center;text-align:center}
+#screen-game .tile .lbl{font-size:clamp(10px,calc(1.7*var(--u)),11.5px)}
+#screen-game .tile .num{font-size:clamp(15px,calc(2.4*var(--u)),19px)}
 </style>
 <script>
 // 以實際可視高度校正版面（修正手機網址列／工具列造成的高度誤差）
@@ -322,6 +333,7 @@ input{font-size:16px!important}
     document.addEventListener('focusout', function () { setTimeout(function () { window.scrollTo(0, 0); fit(); }, 80); });
 })();
 </script>
+    <link rel="stylesheet" href="./tailwind.css">
 </head>
 <body>
 <div id="rotate-hint"><div style="font-size:54px">📱</div><div>請將手機轉為直向遊玩</div></div>
